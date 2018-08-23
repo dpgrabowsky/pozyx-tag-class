@@ -15,7 +15,6 @@ classdef pozyx_tag < handle
     %   topicName;            - The name of the pozyx topic to subscribe to.
     %   pozyxSubsriber        - The subscriber subscribed to the pozyx measurment topic.
     %   startTime             - The time that the first message is received 
-    %   timeLimit             - The amount of time in seconds before a distanceMeasurment becomes 'old'
     %   youngDistanceMeasure  - A list of distance measurments that are younger than timeLimit seconds
     %   where, n is the number of anchors
     %
@@ -41,7 +40,6 @@ classdef pozyx_tag < handle
         topicName;      % The name of the pozyx topic to subscribe to.
         pozyxSubsriber  % The subscriber subscribed to the pozyx measurment topic.
         startTime       % The time that the first message is received 
-        timeLimit       % The amount of time in seconds before a distanceMeasurment becomes 'old'
         youngDistanceMeasure % A list of distance measurments that are younger than timeLimit seconds
     end
     
@@ -76,7 +74,6 @@ classdef pozyx_tag < handle
             obj.startTime=[];
             obj.distanceMeasure=cell(1,obj.numAnchors);
             obj.youngDistanceMeasure=cell(1,obj.numAnchors);
-            obj.timeLimit=3;
             if(length(varargin)==1)
                 obj.topicName=varargin{1};
                 fprintf('Attempting to subsribe to ''%s''\n',obj.topicName);
@@ -179,9 +176,10 @@ classdef pozyx_tag < handle
             fprintf('\n');
         end
         
-        function obj=RemoveOldMeasurments(obj)
+        function obj=RemoveOldMeasurments(obj,timeLimit)
            % RemoveOldMeasurements removes all measurments for youngDistanceMeasurme that are older than timeLimit
-           
+           % timeLimit - the oldest time in seconds that will not be
+           % deleted
            
            %temporarily store newDistanceMeasure in case it is accessed by
            %something else  
@@ -193,7 +191,7 @@ classdef pozyx_tag < handle
            for(ii=1:length(youngDistanceMeasure))
                temp=youngDistanceMeasure{ii};
                if(~isempty(temp))
-                   idxs=((currentTime-temp(2,:))>obj.timeLimit);
+                   idxs=((currentTime-temp(2,:))>timeLimit);
                    temp(:,idxs)=[];
                    youngDistanceMeasure{ii}=temp;
                end
