@@ -94,7 +94,6 @@ classdef pozyx_tag < handle
         end
         
         function obj=SubscriberCallback(obj, src, message)
-            addpath('/home/turtlebotmaster/Desktop/MATLAB/custom_msgs/matlab_gen/msggen')
             % SubscriberCallback This function will be called whenever the
             % pozyx topic that is subscribed to receives a messege 
             % src
