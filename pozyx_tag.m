@@ -41,6 +41,7 @@ classdef pozyx_tag < handle
         pozyxSubsriber  % The subscriber subscribed to the pozyx measurment topic.
         startTime       % The time that the first message is received 
         youngDistanceMeasure % A list of distance measurments that are younger than timeLimit seconds
+        sensorHeight
     end
     
     methods
@@ -74,6 +75,7 @@ classdef pozyx_tag < handle
             obj.startTime=[];
             obj.distanceMeasure=cell(1,obj.numAnchors);
             obj.youngDistanceMeasure=cell(1,obj.numAnchors);
+            obj.sensorHeight=0.3084;
             if(length(varargin)==1)
                 obj.topicName=varargin{1};
                 fprintf('Attempting to subsribe to ''%s''\n',obj.topicName);
@@ -81,7 +83,8 @@ classdef pozyx_tag < handle
                 topicList=rostopic('list');
                 if(find(strcmp(obj.topicName,topicList)))
                     fprintf('    Topic found, creating subscriber.\n');
-                    obj.pozyxSubsriber=rossubscriber(obj.topicName,'pozyx_ros_examples/DeviceRange',@obj.SubscriberCallback);    
+                    %obj.pozyxSubsriber=rossubscriber(obj.topicName,'pozyx_ros_examples/DeviceRange',@obj.SubscriberCallback); 
+                    obj.pozyxSubsriber=rossubscriber(obj.topicName,@obj.SubscriberCallback);    
                 else
                     fprintf('    WARNING: Topic does not exist, subsriber not set \n');
                 end
@@ -91,6 +94,7 @@ classdef pozyx_tag < handle
         end
         
         function obj=SubscriberCallback(obj, src, message)
+            addpath('/home/turtlebotmaster/Desktop/MATLAB/custom_msgs/matlab_gen/msggen')
             % SubscriberCallback This function will be called whenever the
             % pozyx topic that is subscribed to receives a messege 
             % src
@@ -132,7 +136,7 @@ classdef pozyx_tag < handle
             
             %parse the distances
             temp=obj.distanceMeasure{anchorIdx};
-            temp(end+1)=double(message.Distance)*10^-3;
+            temp(end+1)=real(sqrt((double(message.Distance)*10^-3)^2-obj.sensorHeight^2));
             obj.distanceMeasure{anchorIdx}=temp;
             
             %parse the youngDistance
